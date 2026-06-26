@@ -209,3 +209,5 @@ allowBuilds:
   simple-git-hooks: true
   typeit: true
   unrs-resolver: true
+catalog:
+  acorn-walk: ^8.3.5
