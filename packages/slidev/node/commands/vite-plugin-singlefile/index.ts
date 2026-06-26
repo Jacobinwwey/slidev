@@ -385,9 +385,9 @@ export function viteSingleFile(userOptions: SingleFileOptions = {}): Plugin {
 var __modules={};
 var __moduleCache={};
 function __require(p){
-  if(__moduleCache[p])return __moduleCache[p];
+  if(__moduleCache[p])return __moduleCache[p].exports;
   var m={exports:{}};
-  __moduleCache[p]=m.exports;
+  __moduleCache[p]=m;
   if(__modules[p]){__modules[p](m,m.exports,__require);}
   else{console.warn("[singlefile] Module not found:",p);}
   return m.exports;
@@ -878,7 +878,7 @@ export function transformESMViaAST(code: string, fileName: string): string {
 // ─── IIFE wrapper ────────────────────────────────────────────────────────────
 
 function wrapIIFE(code: string): string {
-  return `(function(){\n"use strict";\nvar __moduleCache={};\nfunction __require(p){if(__moduleCache[p])return __moduleCache[p];var m={exports:{}};__moduleCache[p]=m.exports;if(typeof __modules!=='undefined'&&__modules[p]){__modules[p](m,m.exports,__require);}return m.exports;}\ntry{\n${code}\n}catch(e){console.error('[singlefile] Module error:',e);throw e;}\n})();`
+  return `(function(){\n"use strict";\nvar __moduleCache={};\nfunction __require(p){if(__moduleCache[p])return __moduleCache[p].exports;var m={exports:{}};__moduleCache[p]=m;if(typeof __modules!=='undefined'&&__modules[p]){__modules[p](m,m.exports,__require);}return m.exports;}\ntry{\n${code}\n}catch(e){console.error('[singlefile] Module error:',e);throw e;}\n})();`
 }
 
 // Transform ESM to CJS for single-file bundle mode — returns raw module body
@@ -887,7 +887,7 @@ export function transformESMForBundle(code: string, fileName: string): string {
   const transformed = transformESMViaAST(code, fileName)
   // Strip the IIFE wrapper — we only want the inner module body
   // The IIFE pattern is: (function(){...})();
-  const prefix = '(function(){\n"use strict";\nvar __moduleCache={};\nfunction __require(p){if(__moduleCache[p])return __moduleCache[p];var m={exports:{}};__moduleCache[p]=m.exports;if(typeof __modules!==\'undefined\'&&__modules[p]){__modules[p](m,m.exports,__require);}return m.exports;}\ntry{\n'
+  const prefix = '(function(){\n"use strict";\nvar __moduleCache={};\nfunction __require(p){if(__moduleCache[p])return __moduleCache[p].exports;var m={exports:{}};__moduleCache[p]=m;if(typeof __modules!==\'undefined\'&&__modules[p]){__modules[p](m,m.exports,__require);}return m.exports;}\ntry{\n'
   const suffix = '\n}catch(e){console.error(\'[singlefile] Module error:\',e);throw e;}\n})();'
   if (transformed.startsWith(prefix) && transformed.endsWith(suffix)) {
     return transformed.slice(prefix.length, transformed.length - suffix.length)
