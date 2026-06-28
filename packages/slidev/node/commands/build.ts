@@ -6,8 +6,9 @@ import http from 'node:http'
 import { join, resolve } from 'node:path'
 import connect from 'connect'
 import sirv from 'sirv'
-import { build as viteBuild } from 'vite'
+import { build as viteBuild, mergeConfig } from 'vite'
 import { resolveViteConfigs } from './shared'
+import { viteSingleFile } from './vite-plugin-singlefile'
 
 export async function build(
   options: ResolvedSlidevOptions,
@@ -17,6 +18,15 @@ export async function build(
   const indexHtmlId = resolve(options.userRoot, 'index.html')
 
   let config: ResolvedConfig = undefined!
+
+  const isStandalone = !!args['standalone-bundle']
+
+  // For standalone bundles, force hash routing for file:// protocol compatibility.
+  // This overrides the user's routerMode to ensure the presentation works
+  // when opened directly from the filesystem.
+  if (isStandalone && options.data.config.routerMode !== 'hash') {
+    options.data.config.routerMode = 'hash'
+  }
 
   const inlineConfig = await resolveViteConfigs(
     options,
@@ -44,6 +54,7 @@ export async function build(
             },
           },
         },
+        ...(isStandalone ? [viteSingleFile()] : []),
       ],
       build: {
         chunkSizeWarningLimit: 2000,
@@ -52,6 +63,7 @@ export async function build(
             index: indexHtmlId,
           },
         },
+        ...(isStandalone ? { cssCodeSplit: false } : {}),
       },
     } satisfies InlineConfig,
     viteConfig,
@@ -130,6 +142,14 @@ export async function build(
   const redirectsPath = resolve(outDir, '_redirects')
   if (!existsSync(redirectsPath))
     await fs.writeFile(redirectsPath, `${config.base}*    ${config.base}index.html   200\n`, 'utf-8')
+
+  // Generate standalone bundle if enabled
+  if (isStandalone) {
+    // The viteSingleFile plugin already inlines everything into index.html
+    // during the build. Just copy to the standalone filename.
+    const standalonePath = resolve(outDir, 'index-standalone.html')
+    await fs.copyFile(resolve(outDir, 'index.html'), standalonePath)
+  }
 
   if ([true, 'true', 'auto'].includes(options.data.config.download)) {
     const { exportSlides, getExportOptions } = await import('./export')
