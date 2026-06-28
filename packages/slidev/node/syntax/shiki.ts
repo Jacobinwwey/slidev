@@ -37,7 +37,31 @@ export default async function MarkdownItShiki({ data: { config }, mode, utils: {
     } satisfies ShikiTransformer,
   ].filter(isTruthy) as ShikiTransformer[]
 
-  return fromAsyncCodeToHtml(shiki.codeToHtml, {
+  // Wrap codeToHtml so a code fence using a language Shiki hasn't bundled
+  // (e.g. `pseudo`, custom grammars) degrades to plain rendering instead of
+  // failing the whole build with `ShikiError: Language '...' is not included
+  // in this bundle`. On such a failure we re-render with `lang: 'text'` and
+  // restore the original `language-<lang>` class so styling/CSS selectors
+  // still apply. Known languages are unaffected.
+  const rawCodeToHtml = shiki.codeToHtml.bind(shiki)
+  const safeCodeToHtml: typeof shiki.codeToHtml = async (code, options) => {
+    try {
+      return await rawCodeToHtml(code, options as any)
+    }
+    catch (err: any) {
+      const msg = String(err?.message || '')
+      if (/is not included in this bundle|Language .* not .*load/i.test(msg)) {
+        // Unknown/un-bundled grammar (e.g. `pseudo`, custom langs): re-render as
+        // plain text and restore the original `language-<lang>` class so code
+        // block styling & CSS selectors still apply.
+        return (await rawCodeToHtml(code, { ...(options as any), lang: 'text' }))
+          .replace('class="language-text', `class="language-${((options as any)?.lang) || 'text'}`)
+      }
+      throw err
+    }
+  }
+
+  return fromAsyncCodeToHtml(safeCodeToHtml, {
     ...shikiOptions,
     transformers,
   })
