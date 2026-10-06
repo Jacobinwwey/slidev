@@ -664,7 +664,7 @@ export function transformESMViaAST(code: string, fileName: string): string {
     ExportDefaultDeclaration(node: any) {
       if (node.declaration.type === 'Identifier') {
         const name = node.declaration.name
-        edits.push({ start: node.start, end: node.end, replacement: `module.exports.default=module.exports=${name};` })
+        edits.push({ start: node.start, end: node.end, replacement: `module.exports.default=${name};` })
       }
       else if (
         node.declaration.type === 'FunctionDeclaration' ||
@@ -675,13 +675,13 @@ export function transformESMViaAST(code: string, fileName: string): string {
         edits.push({
           start: node.start,
           end: node.end,
-          replacement: `${declCode};module.exports.default=module.exports=${declName};`,
+          replacement: `${declCode};module.exports.default=${declName};`,
         })
       }
       else {
         // export default <expression>
         const declCode = code.slice(node.declaration.start, node.declaration.end)
-        edits.push({ start: node.start, end: node.end, replacement: `module.exports.default=module.exports=${declCode};` })
+        edits.push({ start: node.start, end: node.end, replacement: `module.exports.default=${declCode};` })
       }
     },
 
@@ -694,7 +694,7 @@ export function transformESMViaAST(code: string, fileName: string): string {
             const imported = spec.local.type === 'Identifier' ? spec.local.name : spec.local.value
             const exported = spec.exported.type === 'Identifier' ? spec.exported.name : spec.exported.value
             if (exported === 'default') {
-              return `module.exports.default=module.exports=__require('${source}').${imported};`
+              return `module.exports.default=__require('${source}').${imported};`
             }
             return `module.exports.${exported}=__require('${source}').${imported};`
           })
@@ -731,7 +731,7 @@ export function transformESMViaAST(code: string, fileName: string): string {
           const local = spec.local.type === 'Identifier' ? spec.local.name : spec.local.value
           const exported = spec.exported.type === 'Identifier' ? spec.exported.name : spec.exported.value
           if (exported === 'default') {
-            return `module.exports.default=module.exports=${local};`
+            return `module.exports.default=${local};`
           }
           return `module.exports.${exported}=${local};`
         })
@@ -870,7 +870,10 @@ export function transformESMViaAST(code: string, fileName: string): string {
   result = result.replace(/__require\(['"][^'"]+\.css['"]\)\s*;?/g, '')
 
   // ── Wrap in IIFE with __require loader ────────────────────────────
-  result = wrapIIFE(result)
+  // A default export is one namespace member, not a replacement for named
+  // bindings. Vue's async component loader recognizes the ESM namespace tag
+  // and unwraps .default; retaining the namespace also preserves shared chunks.
+  result = wrapIIFE(`Object.defineProperty(module.exports,Symbol.toStringTag,{value:'Module'});\n${result}`)
 
   return result
 }

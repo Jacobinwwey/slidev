@@ -85,13 +85,13 @@ catalogs:
     '@shikijs/markdown-it': ^4.2.0
     '@slidev/rough-notation': ^0.1.0
     '@unhead/vue': ^3.1.1
-    '@unocss/reset': ^66.7.0
+    '@unocss/reset': 66.7.0
     '@vueuse/core': ^14.3.0
     '@vueuse/math': ^14.3.0
     '@vueuse/motion': ^3.0.3
     drauu: ^1.0.0
     file-saver: ^2.0.5
-    floating-vue: ^5.2.2
+    floating-vue: 5.2.2
     fuse.js: ^7.4.1
     katex: ^0.17.0
     lz-string: ^1.5.0
@@ -121,9 +121,10 @@ catalogs:
     '@hedgedoc/markdown-it-plugins': ^2.1.4
     '@lillallol/outline-pdf': ^4.0.0
     '@shikijs/twoslash': ^4.2.0
-    '@shikijs/vitepress-twoslash': ^4.2.0
-    '@unocss/extractor-mdc': ^66.7.0
-    '@unocss/preset-mini': ^66.7.0
+    # Twoslash patches FloatingVue component internals; upgrade this pair together.
+    '@shikijs/vitepress-twoslash': 4.2.0
+    '@unocss/extractor-mdc': 66.7.0
+    '@unocss/preset-mini': 66.7.0
     '@vitejs/plugin-vue': ^6.0.7
     '@vitejs/plugin-vue-jsx': ^5.1.5
     ansis: ^4.3.1
@@ -159,7 +160,8 @@ catalogs:
     sirv: ^3.0.2
     source-map-js: ^1.2.1
     tinyexec: ^1.2.4
-    unocss: ^66.7.0
+    # Keep the published CLI on the tested cohort: 66.10.5 changes MagicString semantics and corrupts directive CSS.
+    unocss: 66.7.0
     unplugin-icons: ^23.0.1
     unplugin-vue-components: ^32.1.0
     unplugin-vue-markdown: ^32.0.0

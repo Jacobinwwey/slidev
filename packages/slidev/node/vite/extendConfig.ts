@@ -71,6 +71,10 @@ export function createConfigPlugin(options: ResolvedSlidevOptions): Plugin {
     conditions: ['import', 'module', 'browser', 'default', options.mode === 'build' ? 'production' : 'development'],
     url: pathToFileURL(options.clientRoot),
   })
+  const resolveCliDep = createResolve({
+    conditions: ['import', 'module', 'browser', 'default', options.mode === 'build' ? 'production' : 'development'],
+    url: pathToFileURL(options.cliRoot),
+  })
   return {
     name: 'slidev:config',
     async config(config) {
@@ -78,6 +82,16 @@ export function createConfigPlugin(options: ResolvedSlidevOptions): Plugin {
         define: options.utils.define,
         resolve: {
           alias: [
+            // Twoslash patches FloatingVue internals. Resolve the tested pair
+            // from the CLI even when a consumer already has newer copies.
+            {
+              find: /^@shikijs\/vitepress-twoslash\/client$/,
+              replacement: fileURLToPath(await resolveCliDep('@shikijs/vitepress-twoslash/client')),
+            },
+            {
+              find: /^floating-vue$/,
+              replacement: fileURLToPath(await resolveCliDep('floating-vue')),
+            },
             {
               find: RE_SLIDEV_CLIENT,
               replacement: `${toAtFS(options.clientRoot)}/index.ts`,

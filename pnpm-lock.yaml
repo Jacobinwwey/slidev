@@ -125,7 +125,7 @@ catalogs:
       specifier: ^3.1.1
       version: 3.1.1
     '@unocss/reset':
-      specifier: ^66.7.0
+      specifier: 66.7.0
       version: 66.7.0
     '@vueuse/core':
       specifier: ^14.3.0
@@ -143,7 +143,7 @@ catalogs:
       specifier: ^2.0.5
       version: 2.0.5
     floating-vue:
-      specifier: ^5.2.2
+      specifier: 5.2.2
       version: 5.2.2
     fuse.js:
       specifier: ^7.4.1
@@ -227,13 +227,13 @@ catalogs:
       specifier: ^4.2.0
       version: 4.2.0
     '@shikijs/vitepress-twoslash':
-      specifier: ^4.2.0
+      specifier: 4.2.0
       version: 4.2.0
     '@unocss/extractor-mdc':
-      specifier: ^66.7.0
+      specifier: 66.7.0
       version: 66.7.0
     '@unocss/preset-mini':
-      specifier: ^66.7.0
+      specifier: 66.7.0
       version: 66.7.0
     '@vitejs/plugin-vue':
       specifier: ^6.0.7
@@ -341,7 +341,7 @@ catalogs:
       specifier: ^1.2.4
       version: 1.2.4
     unocss:
-      specifier: ^66.7.0
+      specifier: 66.7.0
       version: 66.7.0
     unplugin-icons:
       specifier: ^23.0.1
@@ -990,6 +990,9 @@ importers:
       fast-glob:
         specifier: catalog:prod
         version: 3.3.3
+      floating-vue:
+        specifier: catalog:frontend
+        version: 5.2.2(@nuxt/kit@3.13.0(rollup@4.44.1))(vue@3.5.35(typescript@6.0.3))
       get-port-please:
         specifier: catalog:prod
         version: 3.2.0

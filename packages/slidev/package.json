@@ -73,6 +73,7 @@
     "connect": "catalog:prod",
     "fast-deep-equal": "catalog:prod",
     "fast-glob": "catalog:prod",
+    "floating-vue": "catalog:frontend",
     "get-port-please": "catalog:prod",
     "global-directory": "catalog:prod",
     "htmlparser2": "catalog:prod",

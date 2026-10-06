@@ -4,7 +4,7 @@ import MagicString from 'magic-string'
 
 // Re-implement the core transform function from the plugin for testing.
 // This tests the actual AST transformation logic, not a copy.
-import { transformESMViaAST } from '../packages/slidev/node/commands/vite-plugin-singlefile/index.ts'
+import { transformESMViaAST } from '../../packages/slidev/node/commands/vite-plugin-singlefile/index.ts'
 
 describe('vite-plugin-singlefile: AST-based ESM transformation', () => {
   describe('import declarations', () => {
@@ -58,21 +58,21 @@ describe('vite-plugin-singlefile: AST-based ESM transformation', () => {
     it('transforms export default identifier', () => {
       const code = `const App = {};export default App;`
       const result = transformESMViaAST(code, 'test.js')
-      expect(result).toContain('module.exports.default=module.exports=App')
+      expect(result).toContain('module.exports.default=App')
       expect(result).not.toContain('export default')
     })
 
     it('transforms export default function', () => {
       const code = `export default function main() { return 1; }`
       const result = transformESMViaAST(code, 'test.js')
-      expect(result).toContain('module.exports.default=module.exports=main')
+      expect(result).toContain('module.exports.default=main')
       expect(result).toContain('function main()')
     })
 
     it('transforms export default class', () => {
       const code = `export default class MyClass { constructor() {} }`
       const result = transformESMViaAST(code, 'test.js')
-      expect(result).toContain('module.exports.default=module.exports=MyClass')
+      expect(result).toContain('module.exports.default=MyClass')
       expect(result).toContain('class MyClass')
     })
 
@@ -81,7 +81,7 @@ describe('vite-plugin-singlefile: AST-based ESM transformation', () => {
       const result = transformESMViaAST(code, 'test.js')
       expect(result).toContain('module.exports.a=a')
       // b as default — critical for Vue's defineAsyncComponent
-      expect(result).toContain('module.exports.default=module.exports=b')
+      expect(result).toContain('module.exports.default=b')
     })
 
     it('transforms export const/let/var', () => {
@@ -187,7 +187,7 @@ describe('vite-plugin-singlefile: AST-based ESM transformation', () => {
       const result = transformESMViaAST(code, 'test.js')
       // The string "import something from elsewhere" should be preserved
       expect(result).toContain('import something from elsewhere')
-      expect(result).toContain('module.exports.default=module.exports=str')
+      expect(result).toContain('module.exports.default=str')
     })
 
     it('handles multiple imports from same module', () => {
@@ -212,13 +212,13 @@ describe('vite-plugin-singlefile: critical Vue patterns', () => {
     const code = `const _sfc_main = { setup() {} };export { _sfc_main as default };`
     const result = transformESMViaAST(code, 'component.js')
     // This is the CRITICAL pattern for Vue's defineAsyncComponent
-    expect(result).toContain('module.exports.default=module.exports=_sfc_main')
+    expect(result).toContain('module.exports.default=_sfc_main')
   })
 
   it('handles Vue component with both default and named exports', () => {
     const code = `const _sfc_main = {};const _sfc_export = 1;export { _sfc_main as default, _sfc_export };`
     const result = transformESMViaAST(code, 'component.js')
-    expect(result).toContain('module.exports.default=module.exports=_sfc_main')
+    expect(result).toContain('module.exports.default=_sfc_main')
     expect(result).toContain('module.exports._sfc_export=_sfc_export')
   })
 })
